@@ -7,13 +7,14 @@ StreamCity is a real-time data streaming application that simulates and visualiz
 -   `spec.md`: The detailed design specification for the project.
 -   `plan.md`: The implementation plan and task breakdown.
 -   `producers/`: Contains Python scripts that simulate data (vehicles, riders, etc.) and send it to Kafka.
+-   `ksql/`: Contains ksqlDB scripts for stream processing.
 -   `docker-compose.yml`: A Docker Compose file to easily set up a local Kafka environment for development.
 
-## Getting Started
+## Phase 1: Running the Data Producers
 
-There are two primary ways to run this project: with a local Kafka stack via Docker, or by connecting to a managed Confluent Cloud instance.
+This phase covers how to get the data simulators running. You can connect them to a local Kafka instance or a managed Confluent Cloud cluster.
 
-### Option 1: Local Development with Docker (Recommended)
+### Using a Local Kafka Instance (Recommended for Dev)
 
 This method allows you to run the entire data pipeline on your local machine.
 
@@ -76,6 +77,34 @@ If you have a Confluent Cloud cluster, you can configure the producers to send d
 ## Next Steps
 
 With the producers running, the next phase of the project involves:
--   Using **ksqlDB** to process and analyze these real-time data streams.
--   Building a **frontend dashboard** to visualize the vehicle locations on a map.
--   Creating an **alerting service** for anomalies.
+## Phase 2: Processing Streams with ksqlDB
+
+After setting up your producers and ensuring data is flowing into your Kafka topics (either locally or in Confluent Cloud), you can proceed with processing the streams.
+
+**Prerequisites:**
+-   A running ksqlDB cluster in Confluent Cloud.
+-   Data being produced to the `vehicle_locations` and `rider_tapped_on` topics.
+
+**Steps:**
+
+1.  **Open the ksqlDB Editor:**
+    In your Confluent Cloud dashboard, navigate to your ksqlDB cluster to open the web-based editor.
+
+2.  **Run the SQL Scripts:**
+    The logic for stream processing is located in the `ksql/` directory. You should run these scripts in the ksqlDB editor.
+
+    *   **Live Vehicle Tracking:**
+        -   Copy the entire content of `ksql/live_tracking.sql`.
+        -   Paste it into the ksqlDB editor and run the query.
+        -   This will create the `live_vehicle_table`, which always contains the latest status for every vehicle.
+
+    *   **Surge Detection:**
+        -   Copy the entire content of `ksql/surge_detection.sql`.
+        -   Paste it into the ksqlDB editor and run the query.
+        -   This will create the `surge_alerts` stream, which will receive new events whenever a passenger surge is detected.
+
+## Next Steps
+
+With the producers running and the ksqlDB queries active, the next phases of the project involve:
+-   Building a **frontend dashboard** to visualize the data from `live_vehicle_table`.
+-   Creating an **alerting service** to consume events from the `surge_alerts` topic.

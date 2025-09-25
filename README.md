@@ -8,6 +8,7 @@ StreamCity is a real-time data streaming application that simulates and visualiz
 -   `plan.md`: The implementation plan and task breakdown.
 -   `producers/`: Contains Python scripts that simulate data (vehicles, riders, etc.) and send it to Kafka.
 -   `ksql/`: Contains ksqlDB scripts for stream processing.
+-   `dashboard_backend/`: Contains the FastAPI WebSocket server for the frontend.
 -   `docker-compose.yml`: A Docker Compose file to easily set up a local Kafka environment for development.
 
 ## Phase 1: Running the Data Producers
@@ -103,8 +104,31 @@ After setting up your producers and ensuring data is flowing into your Kafka top
         -   Paste it into the ksqlDB editor and run the query.
         -   This will create the `surge_alerts` stream, which will receive new events whenever a passenger surge is detected.
 
+## Phase 3: Running the Dashboard Backend
+
+This service provides a WebSocket endpoint that the future frontend can connect to for receiving live data. It consumes from the `LIVE_VEHICLE_TABLE` topic (created by the ksqlDB script) and broadcasts the updates.
+
+**Prerequisites:**
+-   Phases 1 and 2 are running.
+-   The `LIVE_VEHICLE_TABLE` exists in ksqlDB and is being updated.
+
+**Steps:**
+
+1.  **Install Python Dependencies:**
+    In a new terminal, install the required packages. It's recommended to use the same virtual environment as before.
+    ```bash
+    pip install -r dashboard_backend/requirements.txt
+    ```
+
+2.  **Run the Backend Server:**
+    If you are using Confluent Cloud, make sure your Kafka environment variables are still set.
+    ```bash
+    uvicorn dashboard_backend.main:app --host 0.0.0.0 --port 8000
+    ```
+    The backend server is now running and will start consuming from Kafka and broadcasting to any connected WebSocket clients.
+
 ## Next Steps
 
-With the producers running and the ksqlDB queries active, the next phases of the project involve:
--   Building a **frontend dashboard** to visualize the data from `live_vehicle_table`.
--   Creating an **alerting service** to consume events from the `surge_alerts` topic.
+With the backend running, the final pieces of the puzzle are:
+-   Building a **frontend dashboard** with a map to connect to the WebSocket and visualize the data.
+-   Creating a standalone **alerting service** to consume from the `surge_alerts` topic.

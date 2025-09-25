@@ -59,7 +59,13 @@ This method allows you to run the entire data pipeline on your local machine.
         python3 producers/producer_traffic.py
         ```
 
-4.  **Shut Down the Environment:**
+4.  **(One-Time) Load Route Data:**
+    The delay detection feature requires static route data. Run the following producer once to load this data into the `vehicle_routes` topic.
+    ```bash
+    python3 producers/producer_routes.py
+    ```
+
+5.  **Shut Down the Environment:**
     When you are finished, you can stop the local Kafka stack with:
     ```bash
     docker-compose down
@@ -104,7 +110,13 @@ After setting up your producers and ensuring data is flowing into your Kafka top
     *   **Surge Detection:**
         -   Copy the entire content of `ksql/surge_detection.sql`.
         -   Paste it into the ksqlDB editor and run the query.
-        -   This will create the `surge_alerts` stream, which will receive new events whenever a passenger surge is detected.
+        -   This will create the `surge_alerts` stream.
+
+    *   **Delay Detection:**
+        -   Make sure you have run the `producer_routes.py` script at least once.
+        -   Copy the entire content of `ksql/delay_detection.sql`.
+        -   Paste it into the ksqlDB editor and run the query.
+        -   This will create the `delay_alerts` stream.
 
 ## Phase 3: Running the Dashboard Backend
 
@@ -152,11 +164,11 @@ The frontend is a simple HTML page that uses Leaflet.js to display the vehicle d
 
 ## Phase 5: Running the Alerting Service
 
-This is a standalone consumer that listens to the `surge_alerts` topic and logs a formatted message to the console whenever a surge is detected.
+This is a standalone consumer that listens to both the `surge_alerts` and `delay_alerts` topics and logs formatted messages to the console.
 
 **Prerequisites:**
 -   Phases 1 and 2 are running.
--   The `rider_tapped_on` producer is generating enough events in a concentrated area to trigger the surge detection logic in ksqlDB.
+-   The ksqlDB queries for surge and delay detection are active.
 
 **Steps:**
 
